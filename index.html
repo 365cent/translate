@@ -266,7 +266,7 @@
         }
       });
       textarea.addEventListener('change', () => {
-        throttle(translate(), 1000);
+        throttle(translate(), 100);
       });
       lang.addEventListener('change', translate);
     });
