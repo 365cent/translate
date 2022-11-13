@@ -232,6 +232,19 @@
     <p></p>
   </main>
   <script>
+    function throttle(callback, limit) {
+      var wait = false;
+      return function () {
+        if (!wait) {
+          callback.apply(null, arguments);
+          wait = true;
+          setTimeout(function () {
+            wait = false;
+          }, limit);
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const textarea = document.getElementsByTagName('textarea')[0];
       const lang = document.getElementsByTagName('select')[0];
@@ -240,21 +253,22 @@
       const translate = () => {
         let text = textarea.value;
         let target = lang.value;
-        const response = fetch('https://api-free.deepl.com/v2/translate?auth_key=32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx&target_lang=' + target + '&text=' + text)
+        fetch('https://api-free.deepl.com/v2/translate?auth_key=32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx&target_lang=' + target + '&text=' + text)
           .then(response => response.json())
           .catch(error => console.error('Error:', error))
           .then(data => {
             output.innerHTML = data.translations[0].text;
           });
       }
-      textarea.addEventListener('keyup', function (e) {
+      textarea.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') {
           translate();
         }
       });
-      lang.addEventListener('change', function (e) {
-        translate();
+      textarea.addEventListener('change', () => {
+        throttle(translate(), 1000);
       });
+      lang.addEventListener('change', translate);
     });
   </script>
 
