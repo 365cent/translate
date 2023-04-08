@@ -1,0 +1,1 @@
+/api/:lang/:text  https://api-free.deepl.com/v2/translate?auth_key=${{ secrets.AUTH_KEY }}&target_lang=:lang&text=:text  200
