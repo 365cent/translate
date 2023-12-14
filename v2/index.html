@@ -257,7 +257,7 @@
         let text = textarea.value;
         let target = lang.value;
         if (text.length > 0) {
-          fetch('https://ai-translator.volume.workers.dev/?lang=' + target + '&text=' + text)
+          fetch('/ai?lang=' + target + '&text=' + text)
             .then(response => response.json())
             .catch(error => console.error('Error:', error))
             .then(data => {
