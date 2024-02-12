@@ -1,2 +1,2 @@
-/api/* lang=:lang text=:text https://api-free.deepl.com/v2/translate?auth_key=32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx&target_lang=:lang&text=:text 200
+/api https://api-free.deepl.com/v2/translate 200
 /ai/* lang=:lang text=:text  https://ai-translator.volume.workers.dev/?lang=:lang&text=:text  200
