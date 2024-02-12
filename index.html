@@ -258,7 +258,7 @@
         let target = lang.value;
         if (text.length > 0) {
           let payload = {
-            lang: target,
+            target_lang: target,
             text: text
           }
           fetch('/api', {
