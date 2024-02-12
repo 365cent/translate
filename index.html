@@ -234,49 +234,60 @@
     <p></p>
   </main>
   <script>
-    function debounce(func, wait, immediate) {
-      var timeout;
-      return function () {
-        var context = this, args = arguments;
-        var later = function () {
-          timeout = null;
-          if (!immediate) func.apply(context, args);
+        function debounce(func, wait, immediate) {
+            var timeout;
+            return function () {
+                var context = this, args = arguments;
+                var later = function () {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                };
+                var callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func.apply(context, args);
+            };
         };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-      };
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-      const textarea = document.getElementsByTagName('textarea')[0];
-      const lang = document.getElementsByTagName('select')[0];
-      const output = document.getElementsByTagName('p')[0];
-      textarea.focus();
-      const translate = () => {
-        let text = JSON.stringify(textarea.value.split('\n'));
-        let target = lang.value;
-        if (text.length > 0) {
-          fetch('/api?lang=${target}&text=${text}')
-            .then(response => response.json())
-            .catch(error => console.error('Error:', error))
-            .then(data => {
-              output.innerHTML = data.translations[0].text.join('<br/>');
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementsByTagName('textarea')[0];
+            const lang = document.getElementsByTagName('select')[0];
+            const output = document.getElementsByTagName('p')[0];
+            const authHeaders = new Headers();
+            authHeaders.append("Content-Type", "application/json");
+            authHeaders.append("Authorization", "DeepL-Auth-Key 32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx");
+            textarea.focus();
+            const translate = () => {
+                let text = JSON.stringify(textarea.value.split('\n').filter(line => line.length > 0));
+                let target = lang.value;
+                let payload = JSON.stringify({
+                    "text": text,
+                    "target_lang": target
+                });
+                console.log(text);
+                if (text.length > 0) {
+                    fetch('/api', {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: payload
+                    })
+                        .then(response => response.json())
+                        .catch(error => console.error('Error:', error))
+                        .then(data => {
+                            output.innerHTML = data.translations[0].text.join('<br/>');
+                        });
+                } else {
+                    output.innerHTML = '';
+                }
+            }
+            textarea.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    translate();
+                }
             });
-        } else {
-          output.innerHTML = '';
-        }
-      }
-      textarea.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-          translate();
-        }
-      });
-      textarea.addEventListener('input',
-        debounce(translate, 200)
-      );
-      lang.addEventListener('change', translate);
-    });
-  </script>
-
+            textarea.addEventListener('input',
+                debounce(translate, 1000)
+            );
+            lang.addEventListener('change', translate);
+        });
+    </script>
 </html>
