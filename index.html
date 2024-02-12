@@ -288,7 +288,7 @@
                 }
             });
             textarea.addEventListener('input',
-                debounce(translate, 1000)
+                debounce(translate, 200)
             );
             lang.addEventListener('change', translate);
         });
