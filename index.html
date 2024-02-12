@@ -257,7 +257,7 @@
             authHeaders.append("Authorization", "DeepL-Auth-Key 32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx");
             textarea.focus();
             const translate = () => {
-                let text = JSON.stringify(textarea.value.split('\n').filter(line => line.length > 0));
+                let text = textarea.value.split('\n');
                 let target = lang.value;
                 let payload = JSON.stringify({
                     "text": text,
