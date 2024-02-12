@@ -257,7 +257,7 @@
         let text = JSON.stringify(textarea.value.split('\n'));
         let target = lang.value;
         if (text.length > 0) {
-          fetch('/api?lang=${target}&text=${text}'')
+          fetch('/api?lang=${target}&text=${text}')
             .then(response => response.json())
             .catch(error => console.error('Error:', error))
             .then(data => {
