@@ -254,19 +254,10 @@
       const output = document.getElementsByTagName('p')[0];
       textarea.focus();
       const translate = () => {
-        let text = textarea.value.split('\n');
+        let text = JSON.stringify(textarea.value.split('\n'));
         let target = lang.value;
         if (text.length > 0) {
-          let payload = {
-            target_lang: target,
-            text: text
-          }
-          fetch('/api', {
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-          })
+          fetch('/api/')
             .then(response => response.json())
             .catch(error => console.error('Error:', error))
             .then(data => {
