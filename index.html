@@ -273,7 +273,11 @@
                         .then(response => response.json())
                         .catch(error => console.error('Error:', error))
                         .then(data => {
-                            output.innerHTML = data.translations[0].text.join('<br/>');
+                            let result = '';
+                            output.innerHTML = data.translations.forEach(e => {
+                                result += e.text + '<br/>';
+                            });
+                            output.innerHTML = result;
                         });
                 } else {
                     output.innerHTML = '';
