@@ -4,7 +4,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Translator</title>
-  <meta name="description" content="Translator powered by Cloudflare Workers AI">
+  <meta name="description" content="Translator powered by DeepL API">
   <style>
     * {
       font-weight: 400;
@@ -147,7 +147,7 @@
     main {
       display: grid;
       gap: 1em;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, 50%);
       margin: 4em auto;
       padding: 1em 0;
       white-space: nowrap;
@@ -159,7 +159,6 @@
       resize: vertical;
       padding: 1em;
       border: 1px solid #6d4aff;
-      border-radius: 0.3em;
       outline: none;
       border-radius: .3em;
       transition: border .3s;
@@ -234,49 +233,63 @@
     <p></p>
   </main>
   <script>
-    function debounce(func, wait, immediate) {
-      var timeout;
-      return function () {
-        var context = this, args = arguments;
-        var later = function () {
-          timeout = null;
-          if (!immediate) func.apply(context, args);
+        function debounce(func, wait, immediate) {
+            var timeout;
+            return function () {
+                var context = this, args = arguments;
+                var later = function () {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                };
+                var callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func.apply(context, args);
+            };
         };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-      };
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-      const textarea = document.getElementsByTagName('textarea')[0];
-      const lang = document.getElementsByTagName('select')[0];
-      const output = document.getElementsByTagName('p')[0];
-      textarea.focus();
-      const translate = () => {
-        let text = textarea.value;
-        let target = lang.value;
-        if (text.length > 0) {
-          fetch('/ai?lang=' + target + '&text=' + text)
-            .then(response => response.json())
-            .catch(error => console.error('Error:', error))
-            .then(data => {
-              output.innerHTML = data.response.translated_text;
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementsByTagName('textarea')[0];
+            const lang = document.getElementsByTagName('select')[0];
+            const output = document.getElementsByTagName('p')[0];
+            const authHeaders = new Headers();
+            authHeaders.append("Content-Type", "application/json");
+            authHeaders.append("Authorization", "DeepL-Auth-Key 32f4caa5-ce12-98c6-edc9-e254f2bb99d9:fx");
+            textarea.focus();
+            const translate = () => {
+                let text = textarea.value.split('\n');
+                let target = lang.value;
+                let payload = JSON.stringify({
+                    "text": text,
+                    "target_lang": target
+                });
+                if (text.length > 0) {
+                    fetch('/api', {
+                        method: 'POST',
+                        headers: authHeaders,
+                        body: payload
+                    })
+                        .then(response => response.json())
+                        .catch(error => console.error('Error:', error))
+                        .then(data => {
+                            let result = '';
+                            output.innerHTML = data.translations.forEach(e => {
+                                result += e.text + '<br/>';
+                            });
+                            output.innerHTML = result;
+                        });
+                } else {
+                    output.innerHTML = '';
+                }
+            }
+            textarea.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    translate();
+                }
             });
-        } else {
-          output.innerHTML = '';
-        }
-      }
-      textarea.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-          translate();
-        }
-      });
-      textarea.addEventListener('input',
-        debounce(translate, 200)
-      );
-      lang.addEventListener('change', translate);
-    });
-  </script>
-
+            textarea.addEventListener('input',
+                debounce(translate, 200)
+            );
+            lang.addEventListener('change', translate);
+        });
+    </script>
 </html>
