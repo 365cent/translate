@@ -223,16 +223,16 @@
 		<label>
 			Select target language:
 			<select name="lang">
-				<option value="zh">🇨🇳 Chinese</option>
-				<option value="fr">🇫🇷 French</option>
-				<option value="en">🇺🇸 English</option>
-				<option value="es">🇪🇸 Spanish</option>
-				<option value="hi">🇮🇳 Hindi</option>
-				<option value="ar">🇸🇦 Arabic</option>
-				<option value="bn">🇧🇩 Bengali</option>
-				<option value="pt">🇵🇹 Portuguese</option>
-				<option value="ru">🇷🇺 Russian</option>
-				<option value="ja">🇯🇵 Japanese</option>
+				<option value="zh">&#x1F1E8;&#x1F1F3; Chinese</option>
+				<option value="en">&#x1F1FA;&#x1F1F8; English</option>
+				<option value="fr">&#x1F1EB;&#x1F1F7; French</option>
+				<option value="es">&#x1F1EA;&#x1F1F8; Spanish</option>
+				<option value="hi">&#x1F1EE;&#x1F1F3; Hindi</option>
+				<option value="ar">&#x1F1F8;&#x1F1E6; Arabic</option>
+				<option value="bn">&#x1F1E7;&#x1F1E9; Bengali</option>
+				<option value="pt">&#x1F1F5;&#x1F1F9; Portuguese</option>
+				<option value="ru">&#x1F1F7;&#x1F1FA; Russian</option>
+				<option value="ja">&#x1F1EF;&#x1F1F5; Japanese</option>
 			</select>
 		</label>
 		<label>Result: </label>
@@ -259,24 +259,11 @@
 			const textarea = document.getElementsByTagName('textarea')[0];
 			const lang = document.getElementsByTagName('select')[0];
 			const output = document.getElementsByTagName('p')[0];
-			const langList = {
-				"zh": "chinese",
-				"fr": "french",
-				"en": "english",
-				"es": "spanish",
-				"hi": "hindi",
-				"ar": "arabic",
-				"bn": "bengali",
-				"pt": "portuguese",
-				"ru": "russian",
-				"ja": "japanese"
-			}
 
 			textarea.focus();
 
 			const translate = async () => {
 				const text = textarea.value;
-				const targetLang = langList[lang.value];
 
 				if (!text) {
 					output.innerHTML = '';
@@ -290,8 +277,8 @@
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({
-							source_lang: "english",
-							target_lang: targetLang,
+							source_lang: "en",
+							target_lang: lang.value,
 							text_list: [text]
 						})
 					});
