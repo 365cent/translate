@@ -1,2 +1,0 @@
-/api https://api-free.deepl.com/v2/translate 200
-/ai/* lang=:lang text=:text  https://ai-translator.volume.workers.dev/?lang=:lang&text=:text  200
