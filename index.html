@@ -264,41 +264,66 @@
 
 			const translate = async () => {
 				const text = textarea.value;
+				const textList = text.split('\n');
 
-				if (!text) {
-					output.innerHTML = '';
-					return;
-				}
+				// Filter out empty lines and keep track of their positions
+				const nonEmptyLines = [];
+				const lineMap = textList.map((line, index) => {
+					if (line.trim() === '') {
+						return { isEmpty: true, index: index };
+					} else {
+						nonEmptyLines.push(line);
+						return { isEmpty: false, index: index, text: line };
+					}
+				});
 
 				try {
-					const response = await fetch('https://m2m.volume.workers.dev', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							source_lang: "en",
-							target_lang: lang.value,
-							text_list: [text]
-						})
+					let translations = [];
+					// Only make API call if there are non-empty lines
+					if (nonEmptyLines.length > 0) {
+						const response = await fetch('https://m2m.volume.workers.dev', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								target_lang: lang.value,
+								text_list: nonEmptyLines
+							})
+						});
+
+						if (!response.ok) {
+							throw new Error('Translation API request failed');
+						}
+
+						const data = await response.json();
+						if (data.translations && data.translations.length > 0) {
+							translations = data.translations.map(translation => translation.text);
+						} else {
+							throw new Error('Invalid response format');
+						}
+					}
+
+					// Reconstruct the output with empty lines preserved
+					const result = Array(textList.length);
+					let translationIndex = 0;
+
+					lineMap.forEach(line => {
+						if (line.isEmpty) {
+							result[line.index] = '';
+						} else {
+							result[line.index] = translations[translationIndex];
+							translationIndex++;
+						}
 					});
 
-					if (!response.ok) {
-						throw new Error('Translation API request failed');
-					}
+					output.innerHTML = result.join('\n');
 
-					const data = await response.json();
-					if (data.translations && data.translations.length > 0) {
-						output.innerHTML = data.translations[0].text;
-					} else {
-						throw new Error('Invalid response format');
-					}
 				} catch (error) {
 					console.error('Error:', error);
 					output.innerHTML = 'Translation failed. Please try again.';
 				}
 			};
-
 			textarea.addEventListener('keyup', (e) => {
 				if (e.key === 'Enter') {
 					translate();
@@ -306,7 +331,7 @@
 			});
 
 			textarea.addEventListener('input',
-				debounce(translate, 50)
+				debounce(translate, 100)
 			);
 
 			lang.addEventListener('change', translate);
