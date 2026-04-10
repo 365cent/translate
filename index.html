@@ -25,16 +25,22 @@
       ctrl=new AbortController();
       o.innerHTML='Translating\u2026';
       try{
-        const req={
+        const req=(body)=>({
           method:'POST',signal:ctrl.signal,
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({text:text,lang:l.value})
-        };
-        let r=await fetch(API[0],req);
-        if(!r.ok)r=await fetch(API[1],req);
+          body:JSON.stringify(body)
+        });
+        let r=await fetch(API[0],req({text:[text],target_lang:l.value.toUpperCase()}));
+        if(r.ok){
+          const d=await r.json();
+          if(!d.translations?.[0]?.text)throw new Error('bad v0 response');
+          o.innerHTML=d.translations[0].text;
+          return;
+        }
+        r=await fetch(API[1],req({text:text,lang:l.value}));
         if(!r.ok)throw new Error(r.status);
         const d=await r.json();
-        if(!d.translation)throw new Error('bad response');
+        if(!d.translation)throw new Error('bad v1 response');
         o.innerHTML=d.translation;
       }catch(e){if(e.name!=='AbortError')o.innerHTML='Translation failed.';}
     };
