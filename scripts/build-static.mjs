@@ -34,14 +34,17 @@ async function loadEnvFileIfPresent() {
 
 await loadEnvFileIfPresent();
 
-const workerUrl = process.env.WORKER_URL;
-if (!workerUrl) {
-  console.error('Missing WORKER_URL environment variable.');
+const workerUrl = process.env.WORKER_URL || '';
+const deeplUrl = process.env.DEEPL_URL || '';
+if (!workerUrl && !deeplUrl) {
+  console.error('Missing DEEPL_URL or WORKER_URL environment variable.');
   process.exit(1);
 }
 
 const template = await readFile(inputPath, 'utf8');
-const output = template.replace('__WORKER_URL__', workerUrl);
+const output = template
+  .replace('__DEEPL_URL__', deeplUrl)
+  .replace('__WORKER_URL__', workerUrl);
 
 await mkdir(outputDir, { recursive: true });
 await writeFile(outputPath, output, 'utf8');
