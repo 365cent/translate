@@ -12,11 +12,6 @@
   <script>
     function debounce(f,w,i){var t;return function(){var c=this,a=arguments,l=function(){t=null;if(!i)f.apply(c,a);},n=i&&!t;clearTimeout(t);t=setTimeout(l,w);if(n)f.apply(c,a);}}
 
-    const API_BASE='https://api.cloudflare.com/client/v4/accounts/12106063eb1afc7c1440e9866db4b064/ai/v1';
-    const API_KEY='gC2YQYxs1D7LXk1GFTpjSBZi9wqfT0VIb8Po6AwP';
-    const MODEL='@cf/google/gemma-4-26b-a4b-it';
-    const LANG_NAMES={zh:'Chinese',en:'English',fr:'French',es:'Spanish',hi:'Hindi',ar:'Arabic',bn:'Bengali',pt:'Portuguese',ru:'Russian',ja:'Japanese'};
-
     const t=document.querySelector('textarea'),l=document.querySelector('select'),o=document.querySelector('p');
     t.focus();
 
@@ -27,20 +22,16 @@
       if(ctrl)ctrl.abort();
       ctrl=new AbortController();
       o.innerHTML='Translating\u2026';
-      const lang=LANG_NAMES[l.value]||l.value;
       try{
-        const r=await fetch(API_BASE+'/chat/completions',{
+        const r=await fetch('/api/translate',{
           method:'POST',signal:ctrl.signal,
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
-          body:JSON.stringify({model:MODEL,messages:[
-            {role:'system',content:'You are a translator. Translate the user\'s text to '+lang+'. Output ONLY the translated text. Preserve line breaks. No explanations.'},
-            {role:'user',content:text}
-          ]})
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({text:text,lang:l.value})
         });
         if(!r.ok)throw new Error(r.status);
         const d=await r.json();
-        if(!d.choices||!d.choices[0])throw new Error('bad response');
-        o.innerHTML=d.choices[0].message.content.trim();
+        if(!d.translation)throw new Error('bad response');
+        o.innerHTML=d.translation;
       }catch(e){if(e.name!=='AbortError')o.innerHTML='Translation failed.';}
     };
 
