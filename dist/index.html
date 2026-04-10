@@ -10,7 +10,9 @@
   <header><nav><h1><a href="#">Translator</a></h1><ul><li><a href="#">Translate</a></li></ul><details><summary><span class="nav-switch"></span></summary><ul><li><a href="#">Translate</a></li></ul></details></nav></header>
   <main><label>Select target language:<select name="lang"><option value="zh">&#x1F1E8;&#x1F1F3; Chinese</option><option value="en">&#x1F1FA;&#x1F1F8; English</option><option value="fr">&#x1F1EB;&#x1F1F7; French</option><option value="es">&#x1F1EA;&#x1F1F8; Spanish</option><option value="hi">&#x1F1EE;&#x1F1F3; Hindi</option><option value="ar">&#x1F1F8;&#x1F1E6; Arabic</option><option value="bn">&#x1F1E7;&#x1F1E9; Bengali</option><option value="pt">&#x1F1F5;&#x1F1F9; Portuguese</option><option value="ru">&#x1F1F7;&#x1F1FA; Russian</option><option value="ja">&#x1F1EF;&#x1F1F5; Japanese</option></select></label><label>Result: </label><textarea name="text" cols="30" rows="10"></textarea><p></p></main>
   <script>
-    const API=['/v0','/v1'];
+    const DEEPL_URL='https://deepl.mock.moe';
+    const WORKER_URL='https://translate.mock.moe';
+    const API_URL=DEEPL_URL!=='__DEEPL_URL__'?DEEPL_URL:WORKER_URL;
 
     function debounce(f,w,i){var t;return function(){var c=this,a=arguments,l=function(){t=null;if(!i)f.apply(c,a);},n=i&&!t;clearTimeout(t);t=setTimeout(l,w);if(n)f.apply(c,a);}}
 
@@ -21,17 +23,16 @@
     const translate=async()=>{
       const text=t.value.trim();
       if(!text){o.innerHTML='';return;}
+      if(API_URL==='__WORKER_URL__'){o.innerHTML='Configuration error: API URL is missing.';return;}
       if(ctrl)ctrl.abort();
       ctrl=new AbortController();
       o.innerHTML='Translating\u2026';
       try{
-        const req={
+        const r=await fetch(API_URL,{
           method:'POST',signal:ctrl.signal,
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({text:text,lang:l.value})
-        };
-        let r=await fetch(API[0],req);
-        if(!r.ok)r=await fetch(API[1],req);
+        });
         if(!r.ok)throw new Error(r.status);
         const d=await r.json();
         if(!d.translation)throw new Error('bad response');
