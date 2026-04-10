@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/",
-    "dev": "npx wrangler pages dev --port 8788"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
